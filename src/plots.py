@@ -53,14 +53,17 @@ def graficar_matriz_correlacion(df, columnas_num=None):
     corr = df[columnas_validas].corr()
     
     # Crear el gráfico
-    plt.figure(figsize=(8, 6))
-    plt.matshow(corr, cmap='coolwarm', fignum=1)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    im = ax.matshow(corr, cmap='coolwarm')
     
-    plt.xticks(range(len(corr.columns)), corr.columns, rotation=45, ha='left')
-    plt.yticks(range(len(corr.columns)), corr.columns)
+    ax.set_xticks(range(len(corr.columns)))
+    ax.set_xticklabels(corr.columns, rotation=45, ha='left')
+    ax.set_yticks(range(len(corr.columns)))
+    ax.set_yticklabels(corr.columns)
     
     # Agregar la barra de color al lado
-    plt.colorbar()
+    plt.colorbar(im, ax=ax)
     
-    plt.title('Matriz de Correlación', pad=20, fontsize=14, fontweight='bold')
+    fig.suptitle('Matriz de Correlación', fontsize=14, fontweight='bold')
+    plt.tight_layout()
     plt.show()
