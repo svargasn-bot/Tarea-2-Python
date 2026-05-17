@@ -70,8 +70,7 @@ def graficar_matriz_correlacion(df, columnas_num=None):
     # Agregar la barra de color al lado
     plt.colorbar(im, ax=ax)
     
-    fig.suptitle('Matriz de Correlación', fontsize=14, fontweight='bold')
-    plt.tight_layout()
+    plt.title('Matriz de Correlación', pad=20, fontsize=14, fontweight='bold')
     plt.savefig(imagenes_path + 'matriz_correlacion.png')
     plt.show()
     
