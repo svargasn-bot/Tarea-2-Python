@@ -72,9 +72,6 @@ def graficar_matriz_correlacion(df, columnas_num=None):
     
     fig.suptitle('Matriz de Correlación', fontsize=14, fontweight='bold')
     plt.tight_layout()
-<<<<<<< HEAD
-    plt.show()
-=======
     plt.savefig(imagenes_path + 'matriz_correlacion.png')
     plt.show()
     
@@ -158,4 +155,3 @@ def crear_panel_subgraficos(df):
     plt.tight_layout()
     plt.savefig(imagenes_path + 'edad_experiencia_y_ratings.png', dpi=300)
     plt.show()
->>>>>>> dev
