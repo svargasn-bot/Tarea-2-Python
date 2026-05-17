@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
+
+df = pd.read_csv('../data/processed/global_freelancers_processed.csv')
+imagenes_path = '../outputs/figures/'
 
 def graficar_histograma_edades(df):
     plt.figure(figsize=(8, 8))
@@ -9,6 +13,7 @@ def graficar_histograma_edades(df):
     plt.xlabel('Edad')
     plt.ylabel('Frecuencia')
     
+    plt.savefig(imagenes_path + 'histograma_distribucion_edades.png')
     plt.show()
 
 def graficar_torta_idioma(df, columna='language', titulo='Distribución de Idiomas'):
@@ -42,6 +47,7 @@ def graficar_torta_idioma(df, columna='language', titulo='Distribución de Idiom
     plt.title(titulo, fontsize=16, fontweight='bold')
     plt.ylabel('') 
     plt.tight_layout()
+    plt.savefig(imagenes_path + 'torta_idiomas.png')
     plt.show()
 
 def graficar_matriz_correlacion(df, columnas_num=None):
@@ -66,4 +72,86 @@ def graficar_matriz_correlacion(df, columnas_num=None):
     
     fig.suptitle('Matriz de Correlación', fontsize=14, fontweight='bold')
     plt.tight_layout()
+    plt.savefig(imagenes_path + 'matriz_correlacion.png')
+    plt.show()
+    
+def graficar_mapa_de_calor(df):
+    tabla_contingencia = pd.crosstab(df['country'], df['primary_skill']).head(10) # Acotado para legibilidad
+    paises_top = tabla_contingencia.index.tolist()
+    habilidades = tabla_contingencia.columns.tolist()
+    matriz_datos = tabla_contingencia.values
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    cax = ax.imshow(tabla_contingencia.values, cmap='YlOrRd', aspect='auto') # Cambiado de amarillo a rojo
+    fig.colorbar(cax, label='Conteo de Freelancers')
+
+    # Este codigo es para que se muestren los datos dentro de la matriz, de esa manera se entiende mejor
+    for i in range(len(paises_top)):
+        for j in range(len(habilidades)):
+            valor = matriz_datos[i, j]
+            
+            # Dinámica de contraste: si el fondo es rojo muy oscuro (valor alto), 
+            # el texto se pinta blanco. Si es amarillo claro, se pinta negro.
+            color_texto = "white" if valor > matriz_datos.max() * 0.75 else "black"
+            
+            # Dibujar el número en el centro de la celda (j = columna/X, i = fila/Y)
+            ax.text(j, i, int(valor),
+                    ha="center", va="center", 
+                    color=color_texto, fontweight='bold', fontsize=10)
+
+
+    ax.set_xticks(np.arange(len(habilidades)))
+    ax.set_yticks(np.arange(len(paises_top)))
+    ax.set_xticklabels(habilidades, rotation=45, ha='right', fontsize=9)
+    ax.set_yticklabels(paises_top, fontsize=9)
+    ax.set_title('Mapa de Calor: Concentración Laboral por Región', fontsize=13, fontweight='bold')
+
+    plt.tight_layout()
+    plt.savefig(imagenes_path + 'mapa_calor_paises.png')
+    plt.show()
+    
+def graficar_edad_experiencia(df, ax=None):
+    es_independiente = ax is None
+    
+    if es_independiente:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    
+    ax.scatter(df['age'], df['years_of_experience'], alpha=0.6, color='darkorange', s=30)
+    coef = np.polyfit(df['age'], df['years_of_experience'], 1)
+    polinomio = np.poly1d(coef)
+    ax.plot(np.sort(df['age']), polinomio(np.sort(df['age'])), color='red', linewidth=2, label='Tendencia (r=0.62)')
+    ax.set_title('Relación: Edad vs Años de Experiencia', fontsize=12, fontweight='bold')
+    ax.set_xlabel('Edad (Años)', fontsize=10)
+    ax.set_ylabel('Años de Experiencia', fontsize=10)
+    ax.legend()
+    
+    if es_independiente:
+        plt.savefig(imagenes_path + 'graficar_edad_experiencia.png')
+        plt.close()
+        plt.show()
+
+def graficar_ratings(df, ax=None):
+    es_independiente = ax is None
+    
+    if es_independiente:
+        fig, ax = plt.subplots(figsize=(8, 6))
+            
+    ax.hist(df['rating'], bins=15, color='teal', alpha=0.7, edgecolor='white')
+    ax.set_title('Distribución Global de Calificaciones (Ratings)', fontsize=12, fontweight='bold')
+    ax.set_xlabel('Calificación (Rating)', fontsize=10)
+    ax.set_ylabel('Frecuencia de Freelancers', fontsize=10)
+    
+    if es_independiente:
+        plt.savefig(imagenes_path + 'graficar_ratings.png')
+        plt.close()
+        plt.show()
+
+def crear_panel_subgraficos(df):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    
+    graficar_edad_experiencia(df, ax1)
+    graficar_ratings(df, ax2)
+    
+    plt.tight_layout()
+    plt.savefig(imagenes_path + 'edad_experiencia_y_ratings.png', dpi=300)
     plt.show()
