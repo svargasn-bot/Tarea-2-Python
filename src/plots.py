@@ -16,24 +16,20 @@ def graficar_torta_idioma(df, columna='language', titulo='Distribución de Idiom
     Toma un DataFrame, agrupa los valores fuera del Top 10 en 'Otros'
     y genera un gráfico de torta estéticamente profesional.
     """
-    # 1. Contar frecuencias de la columna elegida
+    # Contar frecuencias de la columna elegida
     counts = df[columna].value_counts()
 
-    # 2. Separar el Top 10 y agrupar el resto en "Otros"
+    # separar el Top 10 y agrupar el resto en "Otros"
     top_10 = counts.head(10)
     otros_valor = counts.iloc[10:].sum()
     otros_series = pd.Series({'Otros': otros_valor})
-
-    # 3. Unir ambos para tener el set de datos final
     datos_finales = pd.concat([top_10, otros_series])
 
-    # 4. Crear el gráfico de torta
     plt.figure(figsize=(8, 8))
 
     # Definir colores dinámicamente según la cantidad de elementos
     colores = plt.cm.Paired(range(len(datos_finales)))
 
-    # Graficar con tu configuración estética exacta
     datos_finales.plot(
         kind='pie', 
         labels=datos_finales.index, 
@@ -43,12 +39,28 @@ def graficar_torta_idioma(df, columna='language', titulo='Distribución de Idiom
         pctdistance=0.85,  
         labeldistance=1.1  
     ) 
-
-    # 5. Estética final
     plt.title(titulo, fontsize=16, fontweight='bold')
-    
-    # Quitamos la etiqueta por defecto de pandas en el eje Y para que se vea más limpio
     plt.ylabel('') 
-    
     plt.tight_layout()
+    plt.show()
+
+def graficar_matriz_correlacion(df, columnas_num=None):
+    if columnas_num is None:
+        columnas_num = ['age', 'years_of_experience', 'hourly_rate (USD)', 'rating', 'client_satisfaction']
+    
+    # Nos aseguramos de filtrar solo las columnas que de verdad existan en el DataFrame
+    columnas_validas = [col for col in columnas_num if col in df.columns]
+    corr = df[columnas_validas].corr()
+    
+    # Crear el gráfico
+    plt.figure(figsize=(8, 6))
+    plt.matshow(corr, cmap='coolwarm', fignum=1)
+    
+    plt.xticks(range(len(corr.columns)), corr.columns, rotation=45, ha='left')
+    plt.yticks(range(len(corr.columns)), corr.columns)
+    
+    # Agregar la barra de color al lado
+    plt.colorbar()
+    
+    plt.title('Matriz de Correlación', pad=20, fontsize=14, fontweight='bold')
     plt.show()
