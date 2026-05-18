@@ -5,6 +5,7 @@ import numpy as np
 df = pd.read_csv('../data/processed/global_freelancers_processed.csv')
 imagenes_path = '../outputs/figures/'
 
+# Distribucion Edades Freelancers
 def graficar_histograma_edades(df):
     plt.figure(figsize=(8, 8))
 
@@ -16,23 +17,17 @@ def graficar_histograma_edades(df):
     plt.savefig(imagenes_path + 'histograma_distribucion_edades.png')
     plt.show()
 
+# Distribucion de idiomas
 def graficar_torta_idioma(df, columna='language', titulo='Distribución de Idiomas'):
-    """
-    Toma un DataFrame, agrupa los valores fuera del Top 10 en 'Otros'
-    y genera un gráfico de torta estéticamente profesional.
-    """
-    # Contar frecuencias de la columna elegida
     counts = df[columna].value_counts()
-
-    # separar el Top 10 y agrupar el resto en "Otros"
+    
     top_10 = counts.head(10)
     otros_valor = counts.iloc[10:].sum()
     otros_series = pd.Series({'Otros': otros_valor})
     datos_finales = pd.concat([top_10, otros_series])
 
     plt.figure(figsize=(8, 8))
-
-    # Definir colores dinámicamente según la cantidad de elementos
+    
     colores = plt.cm.Paired(range(len(datos_finales)))
 
     datos_finales.plot(
@@ -50,6 +45,7 @@ def graficar_torta_idioma(df, columna='language', titulo='Distribución de Idiom
     plt.savefig(imagenes_path + 'torta_idiomas.png')
     plt.show()
 
+# Matriz de correlacion
 def graficar_matriz_correlacion(df, columnas_num=None):
     if columnas_num is None:
         columnas_num = ['age', 'years_of_experience', 'hourly_rate (USD)', 'rating', 'client_satisfaction']
@@ -58,7 +54,6 @@ def graficar_matriz_correlacion(df, columnas_num=None):
     columnas_validas = [col for col in columnas_num if col in df.columns]
     corr = df[columnas_validas].corr()
     
-    # Crear el gráfico
     fig, ax = plt.subplots(figsize=(8, 6))
     im = ax.matshow(corr, cmap='coolwarm')
     
@@ -67,34 +62,34 @@ def graficar_matriz_correlacion(df, columnas_num=None):
     ax.set_yticks(range(len(corr.columns)))
     ax.set_yticklabels(corr.columns)
     
-    # Agregar la barra de color al lado
     plt.colorbar(im, ax=ax)
     
     fig.suptitle('Matriz de Correlación', fontsize=14, fontweight='bold')
     plt.tight_layout()
     plt.savefig(imagenes_path + 'matriz_correlacion.png')
     plt.show()
-    
+
+# Mapa de Calor: Concentración Laboral por Región
 def graficar_mapa_de_calor(df):
-    tabla_contingencia = pd.crosstab(df['country'], df['primary_skill']).head(10) # Acotado para legibilidad
+    
+    tabla_contingencia = pd.crosstab(df['country'], df['primary_skill'])
+    
+    # datos necesarios para colocar datos dentro de la matriz
     paises_top = tabla_contingencia.index.tolist()
     habilidades = tabla_contingencia.columns.tolist()
     matriz_datos = tabla_contingencia.values
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    cax = ax.imshow(tabla_contingencia.values, cmap='YlOrRd', aspect='auto') # Cambiado de amarillo a rojo
+    cax = ax.imshow(tabla_contingencia.values, cmap='YlOrRd', aspect='auto')
     fig.colorbar(cax, label='Conteo de Freelancers')
 
-    # Este codigo es para que se muestren los datos dentro de la matriz, de esa manera se entiende mejor
+    # con este codigo se ve el conteo de freelancers
     for i in range(len(paises_top)):
         for j in range(len(habilidades)):
             valor = matriz_datos[i, j]
             
-            # Dinámica de contraste: si el fondo es rojo muy oscuro (valor alto), 
-            # el texto se pinta blanco. Si es amarillo claro, se pinta negro.
             color_texto = "white" if valor > matriz_datos.max() * 0.75 else "black"
             
-            # Dibujar el número en el centro de la celda (j = columna/X, i = fila/Y)
             ax.text(j, i, int(valor),
                     ha="center", va="center", 
                     color=color_texto, fontweight='bold', fontsize=10)
@@ -109,11 +104,13 @@ def graficar_mapa_de_calor(df):
     plt.tight_layout()
     plt.savefig(imagenes_path + 'mapa_calor_paises.png')
     plt.show()
-    
+
+# Relación: Edad vs Años de Experiencia
 def graficar_edad_experiencia(df, ax=None):
-    es_independiente = ax is None
+    # En caso de no ser un subgrafico, se toma el ax como nulo
+    subgrafico = ax is None
     
-    if es_independiente:
+    if subgrafico:
         fig, ax = plt.subplots(figsize=(8, 6))
     
     ax.scatter(df['age'], df['years_of_experience'], alpha=0.6, color='darkorange', s=30)
@@ -125,15 +122,16 @@ def graficar_edad_experiencia(df, ax=None):
     ax.set_ylabel('Años de Experiencia', fontsize=10)
     ax.legend()
     
-    if es_independiente:
+    if subgrafico:
         plt.savefig(imagenes_path + 'graficar_edad_experiencia.png')
         plt.close()
         plt.show()
 
+# Frecuencia de Freelancers
 def graficar_ratings(df, ax=None):
-    es_independiente = ax is None
+    subgrafico = ax is None
     
-    if es_independiente:
+    if subgrafico:
         fig, ax = plt.subplots(figsize=(8, 6))
             
     ax.hist(df['rating'], bins=15, color='teal', alpha=0.7, edgecolor='white')
@@ -141,11 +139,12 @@ def graficar_ratings(df, ax=None):
     ax.set_xlabel('Calificación (Rating)', fontsize=10)
     ax.set_ylabel('Frecuencia de Freelancers', fontsize=10)
     
-    if es_independiente:
+    if subgrafico:
         plt.savefig(imagenes_path + 'graficar_ratings.png')
         plt.close()
         plt.show()
 
+# Panel de subgraficos
 def crear_panel_subgraficos(df):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
     
